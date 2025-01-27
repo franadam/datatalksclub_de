@@ -14,7 +14,7 @@ When your solution has SQL or shell commands and not code
 the README file of your repository.
 
 
-## Question 1. Understanding docker first run 
+### Question 1. Understanding docker first run 
 
 Run docker with the `python:3.12.8` image in an interactive mode, use the entrypoint `bash`.
 
@@ -27,7 +27,7 @@ docker run -it python:3.12.8 bash
 `24.3.1`
 
 
-## Question 2. Understanding Docker networking and docker-compose
+### Question 2. Understanding Docker networking and docker-compose
 
 Given the following `docker-compose.yaml`, what is the `hostname` and `port` that **pgadmin** should use to connect to the postgres database?
 
@@ -66,7 +66,6 @@ volumes:
 If there are more than one answers, select only one of them
 `postgres:5432`
 
-
 ##  Prepare Postgres
 
 Run Postgres and load data as shown in the videos
@@ -87,64 +86,155 @@ Download this data and put it into Postgres.
 You can use the code from the course. It's up to you whether
 you want to use Jupyter or a python script.
 
-## Question 3. Trip Segmentation Count
+### Question 3. Trip Segmentation Count
 
 During the period of October 1st 2019 (inclusive) and November 1st 2019 (exclusive), how many trips, **respectively**, happened:
+
 1. Up to 1 mile
-2. In between 1 (exclusive) and 3 miles (inclusive),
-3. In between 3 (exclusive) and 7 miles (inclusive),
-4. In between 7 (exclusive) and 10 miles (inclusive),
+```sql
+SELECT 
+    COUNT(*) 
+FROM 
+    public.green_taxi_data
+WHERE 
+    lpep_pickup_datetime >= '2019-10-01' 
+    AND lpep_pickup_datetime < '2019-11-01'
+    AND trip_distance <= 1;
+```
+`104,838`
+
+2. In between 1 (exclusive) and 3 miles (inclusive)
+```sql
+SELECT 
+    COUNT(*) 
+FROM 
+    public.green_taxi_data
+WHERE 
+    lpep_pickup_datetime >= '2019-10-01' 
+    AND lpep_pickup_datetime < '2019-11-01'
+    AND trip_distance > 1
+	AND trip_distance <= 3
+```
+`199,013`
+
+3. In between 3 (exclusive) and 7 miles (inclusive)
+```sql
+SELECT 
+    COUNT(*) 
+FROM 
+    public.green_taxi_data
+WHERE 
+    lpep_pickup_datetime >= '2019-10-01' 
+    AND lpep_pickup_datetime < '2019-11-01'
+    AND trip_distance > 3
+	AND trip_distance <= 7
+```
+`109,645`
+
+4. In between 7 (exclusive) and 10 miles (inclusive)
+```sql
+SELECT 
+    COUNT(*) 
+FROM 
+    public.green_taxi_data
+WHERE 
+    lpep_pickup_datetime >= '2019-10-01' 
+    AND lpep_pickup_datetime < '2019-11-01'
+    AND trip_distance > 7
+	AND trip_distance <= 10
+```
+`27,688`
+
 5. Over 10 miles 
+```sql
+SELECT 
+    COUNT(*) 
+FROM 
+    public.green_taxi_data
+WHERE 
+    lpep_pickup_datetime >= '2019-10-01' 
+    AND lpep_pickup_datetime < '2019-11-01'
+    AND trip_distance > 10
+```
+`35,202`
 
-Answers:
-
-- 104,802;  197,670;  110,612;  27,831;  35,281
-- 104,802;  198,924;  109,603;  27,678;  35,189
-- 104,793;  201,407;  110,612;  27,831;  35,281
-- 104,793;  202,661;  109,603;  27,678;  35,189
-- 104,838;  199,013;  109,645;  27,688;  35,202
 
 
-## Question 4. Longest trip for each day
+### Question 4. Longest trip for each day
 
 Which was the pick up day with the longest trip distance?
 Use the pick up time for your calculations.
 
 Tip: For every day, we only care about one single trip with the longest distance. 
 
-- 2019-10-11
-- 2019-10-24
-- 2019-10-26
-- 2019-10-31
+```sql
+SELECT 
+    lpep_pickup_datetime,
+	MAX(trip_distance)
+FROM 
+    public.green_taxi_data
+GROUP BY lpep_pickup_datetime
+ORDER BY MAX(trip_distance) DESC
+```
+`2019-10-31`
 
 
-## Question 5. Three biggest pickup zones
+
+
+### Question 5. Three biggest pickup zones
 
 Which were the top pickup locations with over 13,000 in
 `total_amount` (across all trips) for 2019-10-18?
 
 Consider only `lpep_pickup_datetime` when filtering by date.
  
-- East Harlem North, East Harlem South, Morningside Heights
-- East Harlem North, Morningside Heights
-- Morningside Heights, Astoria Park, East Harlem South
-- Bedford, East Harlem North, Astoria Park
+```sql
+SELECT 
+    gtd.lpep_pickup_datetime,
+	Z."Zone",
+	SUM(gtd.total_amount)
+FROM 
+    public.green_taxi_data gtd
+JOIN public.zones Z
+	ON gtd."PULocationID" = Z."LocationID"
+WHERE 
+	gtd.lpep_pickup_datetime = '2019-10-18'
+GROUP BY gtd.lpep_pickup_datetime, Z."Zone"
+HAVING SUM(gtd.total_amount) > 13000
+ORDER BY SUM(gtd.total_amount) DESC
+```
+`East Harlem North, East Harlem South, Morningside Heights`
 
 
-## Question 6. Largest tip
+
+### Question 6. Largest tip
 
 For the passengers picked up in October 2019 in the zone
-name "East Harlem North" which was the drop off zone that had
+named "East Harlem North" which was the drop off zone that had
 the largest tip?
 
 Note: it's `tip` , not `trip`
 
 We need the name of the zone, not the ID.
+ 
+```sql
+SELECT 
+	Z."LocationID",
+	Z."Zone",
+	tip_amount
+FROM 
+    public.green_taxi_data gtd
+JOIN public.zones Z
+	ON gtd."DOLocationID" = Z."LocationID"
+WHERE 
+	gtd."PULocationID" = 74
+	AND gtd.lpep_pickup_datetime >= '2019-10-01'
+	AND gtd.lpep_pickup_datetime < '2019-11-01'
+ORDER BY tip_amount DESC
+--limit 1
+```
 
-- Yorkville West
-- JFK Airport
-- East Harlem North
-- East Harlem South
+`JFK Airport`
 
 
 ## Terraform
@@ -158,7 +248,7 @@ Copy the files from the course repo
 Modify the files as necessary to create a GCP Bucket and Big Query Dataset.
 
 
-## Question 7. Terraform Workflow
+### Question 7. Terraform Workflow
 
 Which of the following sequences, **respectively**, describes the workflow for: 
 1. Downloading the provider plugins and setting up backend,

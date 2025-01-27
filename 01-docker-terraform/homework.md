@@ -20,10 +20,11 @@ Run docker with the `python:3.12.8` image in an interactive mode, use the entryp
 
 What's the version of `pip` in the image?
 
-- 24.3.1
-- 24.2.1
-- 23.3.1
-- 23.2.1
+```bash
+docker run -it python:3.12.8 bash
+```
+
+`24.3.1`
 
 
 ## Question 2. Understanding Docker networking and docker-compose
@@ -62,13 +63,9 @@ volumes:
     name: vol-pgadmin_data
 ```
 
-- postgres:5433
-- localhost:5432
-- db:5433
-- postgres:5432
-- db:5432
-
 If there are more than one answers, select only one of them
+`postgres:5432`
+
 
 ##  Prepare Postgres
 

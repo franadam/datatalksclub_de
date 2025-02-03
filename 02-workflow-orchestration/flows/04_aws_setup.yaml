@@ -1,0 +1,16 @@
+id: 04_aws_setup
+namespace: zoomcamp
+
+tasks:
+  - id: create_s3_bucket
+    type: io.kestra.plugin.aws.s3.CreateBucket
+    bucket: "{{kv('AWS_BUCKET_NAME')}}"
+
+
+pluginDefaults:
+  - type: io.kestra.plugin.aws
+    values:
+      accessKeyId: "{{kv('AWS_ACCESS_KEY_ID')}}"
+      secretAccessKey: "{{kv('AWS_SECRET_ACCESS_KEY')}}"
+      region: "{{kv('AWS_REGION')}}"
+      bucket: "{{kv('AWS_BUCKET_NAME')}}"

@@ -40,6 +40,63 @@ tasks:
     commands:
       - wget -qO- https://github.com/DataTalksClub/nyc-tlc-data/releases/download/{{inputs.taxi}}/{{render(vars.file)}}.gz | gunzip > {{render(vars.file)}}
 
+  - id: green_create_table
+    type: io.kestra.plugin.jdbc.postgresql.Queries
+    sql: |
+      CREATE TABLE IF NOT EXISTS {{render(vars.table)}} (
+          unique_row_id          text,
+          filename                text,
+          VendorID               text,
+          lpep_pickup_datetime   timestamp,
+          lpep_dropoff_datetime  timestamp,
+          store_and_fwd_flag      text,
+          RatecodeID             text,
+          PULocationID           text,
+          DOLocationID           text,
+          passenger_count        integer,
+          trip_distance          double precision,
+          fare_amount            double precision,
+          extra                  double precision,
+          mta_tax                double precision,
+          tip_amount             double precision,
+          tolls_amount           double precision,
+          ehail_fee              double precision,
+          improvement_surcharge  double precision,
+          total_amount           double precision,
+          payment_type           integer,
+          trip_type              integer,
+          congestion_surcharge   double precision
+      );
+
+  - id: green_create_staging_table
+    runIf: "{{inputs.taxi == 'green'}}"
+    type: io.kestra.plugin.jdbc.postgresql.Queries
+    sql: |
+      CREATE TABLE IF NOT EXISTS {{render(vars.staging_table)}} (
+          unique_row_id          text,
+          filename                text,
+          VendorID               text,
+          lpep_pickup_datetime   timestamp,
+          lpep_dropoff_datetime  timestamp,
+          store_and_fwd_flag      text,
+          RatecodeID             text,
+          PULocationID           text,
+          DOLocationID           text,
+          passenger_count        integer,
+          trip_distance          double precision,
+          fare_amount            double precision,
+          extra                  double precision,
+          mta_tax                double precision,
+          tip_amount             double precision,
+          tolls_amount           double precision,
+          ehail_fee              double precision,
+          improvement_surcharge  double precision,
+          total_amount           double precision,
+          payment_type           integer,
+          trip_type              integer,
+          congestion_surcharge   double precision
+      );
+
 pluginDefaults:
   - type: io.kestra.plugin.jdbc.postgresql
     values:

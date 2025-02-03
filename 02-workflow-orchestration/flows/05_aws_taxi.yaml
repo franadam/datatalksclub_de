@@ -92,6 +92,42 @@ tasks:
           STORED AS TEXTFILE
           LOCATION 's3://{{kv("AWS_BUCKET_NAME")}}/green_tripdata/'
           TBLPROPERTIES ('skip.header.line.count'='1');
+      
+      - id: athena_green_tripdata_ext
+        type: io.kestra.plugin.aws.athena.Query
+        database: "{{kv('AWS_ATHENA_DATABASE')}}"
+        outputLocation: "s3://{{kv('AWS_BUCKET_NAME')}}/AWS_ATHENA_OUTPUT/green_tripdata/"
+        query: |
+          CREATE EXTERNAL TABLE IF NOT EXISTS {{kv('AWS_ATHENA_DATABASE')}}.green_tripdata_ext (
+              VendorID string,
+              lpep_pickup_datetime timestamp,
+              lpep_dropoff_datetime timestamp,
+              store_and_fwd_flag string,
+              RatecodeID string,
+              PULocationID string,
+              DOLocationID string,
+              passenger_count int,
+              trip_distance double,
+              fare_amount double,
+              extra double,
+              mta_tax double,
+              tip_amount double,
+              tolls_amount double,
+              ehail_fee double,
+              improvement_surcharge double,
+              total_amount double,
+              payment_type int,
+              trip_type string,
+              congestion_surcharge double
+          )
+          ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+          WITH SERDEPROPERTIES (
+              'serialization.format' = ',',
+              'field.delim' = ','
+          )
+          STORED AS TEXTFILE
+          LOCATION 's3://{{kv("AWS_BUCKET_NAME")}}/green_tripdata/'
+          TBLPROPERTIES ('skip.header.line.count'='1');
 
 pluginDefaults:
   - type: io.kestra.plugin.aws

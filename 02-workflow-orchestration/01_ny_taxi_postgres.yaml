@@ -31,6 +31,15 @@ tasks:
       file: "{{render(vars.file)}}"
       taxi: "{{inputs.taxi}}"
 
+  - id: extract
+    type: io.kestra.plugin.scripts.shell.Commands
+    outputFiles:
+      - "*.csv"
+    taskRunner:
+      type: io.kestra.plugin.core.runner.Process
+    commands:
+      - wget -qO- https://github.com/DataTalksClub/nyc-tlc-data/releases/download/{{inputs.taxi}}/{{render(vars.file)}}.gz | gunzip > {{render(vars.file)}}
+
 pluginDefaults:
   - type: io.kestra.plugin.jdbc.postgresql
     values:

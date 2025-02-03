@@ -1,0 +1,46 @@
+id: 03_aws_kv
+namespace: zoomcamp
+
+tasks:
+  - id: aws_access_key_id
+    type: io.kestra.plugin.core.kv.Get
+    key: AWS_ACCESS_KEY_ID
+    
+  - id: aws_access_secret_key
+    type: io.kestra.plugin.core.kv.Get
+    key: AWS_SECRET_ACCESS_KEY
+
+  - id: aws_redshift_serverless_url
+    type: io.kestra.plugin.core.kv.Get
+    key: AWS_REDSHIFT_SERVERLESS_URL
+
+  - id: aws_vpc_project_id
+    type: io.kestra.plugin.core.kv.Set
+    key: AWS_PROJECT_ID
+    kvType: STRING
+    value: kestra-vpc-dtc-de # TODO replace with your project id
+
+  - id: aws_region
+    type: io.kestra.plugin.core.kv.Set
+    key: AWS_REGION
+    kvType: STRING
+    value: eu-west-3
+
+  - id: aws_bucket_name
+    type: io.kestra.plugin.core.kv.Set
+    key: AWS_BUCKET_NAME
+    kvType: STRING
+    value: kestra-s3-bucket-dtc-de # TODO make sure it's globally unique!
+
+  - id: aws_redshift_dataset
+    type: io.kestra.plugin.core.kv.Set
+    key: AWS_REDSHIFT_DATASET
+    kvType: STRING
+    value: kestra-redshift-dtc-de
+    
+  - id: aws_athena_dataset
+    type: io.kestra.plugin.core.kv.Set
+    key: AWS_ATHENA_DATABASE
+    kvType: STRING
+    value: kestra-zoomcamp
+    

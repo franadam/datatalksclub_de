@@ -1,0 +1,39 @@
+id: 01_ny_taxi_postgres
+namespace: zoomcamp
+
+inputs:
+  - id: taxi
+    type: SELECT
+    displayName: "Select taxi type"
+    values: ['yellow', 'green']
+    defaults: 'green'
+  - id: year
+    type: SELECT
+    displayName: "Select a year"
+    values: ["2019", "2020"]
+    defaults: "2019"
+  - id: month
+    type: SELECT
+    displayName: "Select a month"
+    values: ["01","02","03","04","05","06","07","08","09","10","11","12"]
+    defaults: "02"
+
+variables:
+  file: "{{inputs.taxi}}_tripdata_{{inputs.year}}-{{inputs.month}}.csv"
+  staging_table: "public.{{inputs.taxi}}_tripdata_staging"
+  table: "public.{{inputs.taxi}}_tripdata"
+  data: "{{outputs.extract.outputFiles[inputs.taxi ~ '_tripdata_' ~ inputs.year ~ '-' ~ inputs.month ~ '.csv']}}"
+
+tasks:
+  - id: set_label
+    type: io.kestra.plugin.core.execution.Labels
+    labels: 
+      file: "{{render(vars.file)}}"
+      taxi: "{{inputs.taxi}}"
+
+pluginDefaults:
+  - type: io.kestra.plugin.jdbc.postgresql
+    values:
+      url: jdbc:postgresql://host.docker.internal:5433/ny_taxi
+      username: root
+      password: root

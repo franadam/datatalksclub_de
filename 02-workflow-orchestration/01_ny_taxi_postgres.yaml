@@ -106,6 +106,27 @@ tasks:
       header: true
       columns: [VendorID,lpep_pickup_datetime,lpep_dropoff_datetime,store_and_fwd_flag,RatecodeID,PULocationID,DOLocationID,passenger_count,trip_distance,fare_amount,extra,mta_tax,tip_amount,tolls_amount,ehail_fee,improvement_surcharge,total_amount,payment_type,trip_type,congestion_surcharge]
 
+    - id: green_add_unique_id_and_filename
+      runIf: "{{inputs.taxi == 'green'}}"
+      type: io.kestra.plugin.jdbc.postgresql.Queries
+      sql: |
+        ALTER TABLE {{render(vars.staging_table)}}
+        ADD COLUMN IF NOT EXISTS unique_row_id text,
+        ADD COLUMN IF NOT EXISTS filename text;
+    
+        UPDATE {{render(vars.staging_table)}}
+        SET 
+          unique_row_id = md5(
+            COALESCE(CAST(VendorID AS text), '') ||
+            COALESCE(CAST(lpep_pickup_datetime AS text), '') || 
+            COALESCE(CAST(lpep_dropoff_datetime AS text), '') || 
+            COALESCE(PULocationID, '') || 
+            COALESCE(DOLocationID, '') || 
+            COALESCE(CAST(fare_amount AS text), '') || 
+            COALESCE(CAST(trip_distance AS text), '')      
+          ),
+          filename = '{{render(vars.file)}}';
+
 
 pluginDefaults:
   - type: io.kestra.plugin.jdbc.postgresql

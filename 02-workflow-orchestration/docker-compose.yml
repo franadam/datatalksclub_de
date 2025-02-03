@@ -9,7 +9,7 @@ services:
     image: postgres
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    environment:y
+    environment: 
       POSTGRES_DB: kestra
       POSTGRES_USER: kestra
       POSTGRES_PASSWORD: k3str4

@@ -97,6 +97,11 @@ tasks:
           congestion_surcharge   double precision
       );
 
+    - id: green_truncate_staging_table
+      type: io.kestra.plugin.jdbc.postgresql.Queries
+      sql: |
+        TRUNCATE TABLE {{render(vars.staging_table)}};
+
     - id: green_copy_in_to_staging_table
       runIf: "{{inputs.taxi == 'green'}}"
       type: io.kestra.plugin.jdbc.postgresql.CopyIn

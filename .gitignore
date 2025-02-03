@@ -59,6 +59,9 @@ venv.bak/
 /01-docker-terraform/yellow_tripdata_2019-01.csv.gz
 /01-docker-terraform/green_tripdata_2019-10.csv.gz
 
+# 01 Orchestration
+/02-workflow-orchestration/ny_taxi_postgres_data
+/02-workflow-orchestration/pgadmin
 
 # Spyder project settings
 .spyderproject

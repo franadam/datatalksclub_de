@@ -48,7 +48,7 @@ tasks:
   - id: upload_to_aws_s3_bucket
     type: "io.kestra.plugin.aws.s3.Upload"
     from: "{{render(vars.data)}}"
-    key: "{{render(vars.file)}}"
+    key: "{{inputs.taxi}}/{{render(vars.file)}}"
     bucket: "{{kv('AWS_BUCKET_NAME')}}"
 
   - id: if_green_taxi
@@ -58,7 +58,7 @@ tasks:
       - id: athena_green_tripdata
         type: io.kestra.plugin.aws.athena.Query
         database: "{{kv('AWS_ATHENA_DATABASE')}}"
-        outputLocation: "s3://{{kv('AWS_BUCKET_NAME')}}/AWS_ATHENA_OUTPUT/green_tripdata/"
+        outputLocation: "s3://{{kv('AWS_BUCKET_NAME')}}/athena_output/{{inputs.taxi}}"
         query: |
           CREATE EXTERNAL TABLE IF NOT EXISTS {{kv('AWS_ATHENA_DATABASE')}}.green_tripdata (
               unique_row_id binary,
@@ -85,18 +85,15 @@ tasks:
               congestion_surcharge double
           )
           ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
-          WITH SERDEPROPERTIES (
-              'serialization.format' = ',',
-              'field.delim' = ','
-          )
-          STORED AS TEXTFILE
-          LOCATION 's3://{{kv("AWS_BUCKET_NAME")}}/green_tripdata/'
-          TBLPROPERTIES ('skip.header.line.count'='1');
+          WITH SERDEPROPERTIES ('field.delim' = ',')
+          STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+          LOCATION 's3://{{kv('AWS_BUCKET_NAME')}}/{{inputs.taxi}}/'
+          TBLPROPERTIES ('classification' = 'csv');
       
       - id: athena_green_tripdata_ext
         type: io.kestra.plugin.aws.athena.Query
         database: "{{kv('AWS_ATHENA_DATABASE')}}"
-        outputLocation: "s3://{{kv('AWS_BUCKET_NAME')}}/AWS_ATHENA_OUTPUT/green_tripdata/"
+        outputLocation: "s3://{{kv('AWS_BUCKET_NAME')}}/athena_output/{{inputs.taxi}}"
         query: |
           CREATE EXTERNAL TABLE IF NOT EXISTS {{kv('AWS_ATHENA_DATABASE')}}.green_tripdata_ext (
               VendorID string,
@@ -121,13 +118,10 @@ tasks:
               congestion_surcharge double
           )
           ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
-          WITH SERDEPROPERTIES (
-              'serialization.format' = ',',
-              'field.delim' = ','
-          )
-          STORED AS TEXTFILE
-          LOCATION 's3://{{kv("AWS_BUCKET_NAME")}}/green_tripdata/'
-          TBLPROPERTIES ('skip.header.line.count'='1');
+          WITH SERDEPROPERTIES ('field.delim' = ',')
+          STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+          LOCATION 's3://{{kv('AWS_BUCKET_NAME')}}/{{inputs.taxi}}/'
+          TBLPROPERTIES ('classification' = 'csv');
 
 pluginDefaults:
   - type: io.kestra.plugin.aws

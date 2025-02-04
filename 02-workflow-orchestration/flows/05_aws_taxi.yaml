@@ -48,7 +48,7 @@ tasks:
   - id: upload_to_aws_s3_bucket
     type: "io.kestra.plugin.aws.s3.Upload"
     from: "{{render(vars.data)}}"
-    key: "{{inputs.taxi}}/{{render(vars.file)}}"
+    key: "csv/{{inputs.taxi}}/{{render(vars.file)}}"
     bucket: "{{kv('AWS_BUCKET_NAME')}}"
 
   - id: if_green_taxi
@@ -87,9 +87,16 @@ tasks:
           ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
           WITH SERDEPROPERTIES ('field.delim' = ',')
           STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-          LOCATION 's3://{{kv('AWS_BUCKET_NAME')}}/{{inputs.taxi}}/'
+          LOCATION 's3://{{kv('AWS_BUCKET_NAME')}}/csv/{{inputs.taxi}}/'
           TBLPROPERTIES ('classification' = 'csv');
-      
+
+      - id: athena_drop_green_tripdata_ext
+        type: io.kestra.plugin.aws.athena.Query
+        database: "{{ kv('AWS_ATHENA_DATABASE') }}"
+        outputLocation: "s3://{{ kv('AWS_BUCKET_NAME') }}/athena_output/{{ inputs.taxi }}"
+        query: |
+          DROP TABLE IF EXISTS {{ render(vars.table) }};
+
       - id: athena_green_tripdata_ext
         type: io.kestra.plugin.aws.athena.Query
         database: "{{kv('AWS_ATHENA_DATABASE')}}"
@@ -120,7 +127,7 @@ tasks:
           ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
           WITH SERDEPROPERTIES ('field.delim' = ',')
           STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-          LOCATION 's3://{{kv('AWS_BUCKET_NAME')}}/{{inputs.taxi}}/'
+          LOCATION 's3://{{kv('AWS_BUCKET_NAME')}}/csv/{{inputs.taxi}}/'
           TBLPROPERTIES ('classification' = 'csv');
 
       - id: athena_green_tripdata_add_unique_id_and_filename
@@ -131,7 +138,7 @@ tasks:
           CREATE TABLE {{ render(vars.table) }}
           WITH (
             format = 'PARQUET',
-            external_location = 's3://{{ kv("AWS_BUCKET_NAME") }}/{{ render(vars.table) }}/'
+            external_location = 's3://{{ kv('AWS_BUCKET_NAME') }}/tables/{{ inputs.taxi }}/{{ render(vars.table) }}/'
           ) AS
           SELECT
             md5(to_utf8(concat(
@@ -144,6 +151,40 @@ tasks:
             '{{ render(vars.file) }}' AS filename,
             *
           FROM {{ render(vars.table) }}_ext;
+
+      - id: athena_green_insert_into
+        type: io.kestra.plugin.aws.athena.Query
+        database: "{{kv('AWS_ATHENA_DATABASE')}}"
+        outputLocation: "s3://{{kv('AWS_BUCKET_NAME')}}/athena_output/{{inputs.taxi}}"
+        query: |
+          INSERT INTO {{kv('AWS_ATHENA_DATABASE')}}.green_tripdata
+          SELECT
+            S.unique_row_id,
+            S.filename,
+            S.VendorID,
+            S.lpep_pickup_datetime,
+            S.lpep_dropoff_datetime,
+            S.store_and_fwd_flag,
+            S.RatecodeID,
+            S.PULocationID,
+            S.DOLocationID,
+            S.passenger_count,
+            S.trip_distance,
+            S.fare_amount,
+            S.extra,
+            S.mta_tax,
+            S.tip_amount,
+            S.tolls_amount,
+            S.ehail_fee,
+            S.improvement_surcharge,
+            S.total_amount,
+            S.payment_type,
+            S.trip_type,
+            S.congestion_surcharge
+          FROM {{ render(vars.table) }} S
+          LEFT JOIN {{kv('AWS_ATHENA_DATABASE')}}.green_tripdata T
+            ON T.unique_row_id = S.unique_row_id
+          WHERE T.unique_row_id IS NULL;
 
 pluginDefaults:
   - type: io.kestra.plugin.aws

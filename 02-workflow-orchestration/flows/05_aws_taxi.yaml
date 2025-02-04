@@ -318,6 +318,11 @@ tasks:
             ON T.unique_row_id = S.unique_row_id
           WHERE T.unique_row_id IS NULL;
 
+  - id: purge_files
+    type: io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles
+    description: If you'd like to explore Kestra outputs, disable it.
+    disabled: false
+    
 pluginDefaults:
   - type: io.kestra.plugin.aws
     values:

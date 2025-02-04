@@ -1,4 +1,4 @@
-id: 02_ny_taxi_postgres
+id: 02_ny_taxi_postgres_scheduled
 namespace: zoomcamp
 description: |
   Best to add a label `backfill:true` from the UI to track executions created via a backfill.
@@ -19,7 +19,6 @@ variables:
   staging_table: "public.{{inputs.taxi}}_tripdata_staging"
   table: "public.{{inputs.taxi}}_tripdata"
   data: "{{outputs.extract.outputFiles[inputs.taxi ~ '_tripdata_' ~ (trigger.date | date('yyyy-MM')) ~ '.csv']}}"
-
 
 tasks:
   - id: set_label

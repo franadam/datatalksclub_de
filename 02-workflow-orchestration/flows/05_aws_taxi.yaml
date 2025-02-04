@@ -51,6 +51,138 @@ tasks:
     key: "csv/{{inputs.taxi}}/{{render(vars.file)}}"
     bucket: "{{kv('AWS_BUCKET_NAME')}}"
 
+  - id: if_yellow_taxi
+    type: io.kestra.plugin.core.flow.If
+    condition: "{{ inputs.taxi == 'yellow' }}"
+    then:
+      - id: athena_yellow_tripdata
+        type: io.kestra.plugin.aws.athena.Query
+        database: "{{ kv('AWS_ATHENA_DATABASE') }}"
+        outputLocation: "s3://{{ kv('AWS_BUCKET_NAME') }}/athena_output/{{ inputs.taxi }}"
+        query: |
+          CREATE EXTERNAL TABLE IF NOT EXISTS {{ kv('AWS_ATHENA_DATABASE') }}.yellow_tripdata (
+              unique_row_id binary,
+              filename string,
+              VendorID string,
+              tpep_pickup_datetime timestamp,
+              tpep_dropoff_datetime timestamp,
+              passenger_count int,
+              trip_distance double,
+              RatecodeID string,
+              store_and_fwd_flag string,
+              PULocationID string,
+              DOLocationID string,
+              payment_type int,
+              fare_amount double,
+              extra double,
+              mta_tax double,
+              tip_amount double,
+              tolls_amount double,
+              improvement_surcharge double,
+              total_amount double,
+              congestion_surcharge double
+          )
+          ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+          WITH SERDEPROPERTIES ('field.delim' = ',')
+          STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat'
+          OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+          LOCATION 's3://{{ kv("AWS_BUCKET_NAME") }}/csv/{{ inputs.taxi }}/'
+          TBLPROPERTIES ('classification' = 'csv');
+
+      - id: athena_drop_yellow_tripdata_ext
+        type: io.kestra.plugin.aws.athena.Query
+        database: "{{ kv('AWS_ATHENA_DATABASE') }}"
+        outputLocation: "s3://{{ kv('AWS_BUCKET_NAME') }}/athena_output/{{ inputs.taxi }}"
+        query: |
+          DROP TABLE IF EXISTS {{ render(vars.table) }};
+
+      - id: athena_yellow_tripdata_ext
+        type: io.kestra.plugin.aws.athena.Query
+        database: "{{ kv('AWS_ATHENA_DATABASE') }}"
+        outputLocation: "s3://{{ kv('AWS_BUCKET_NAME') }}/athena_output/{{ inputs.taxi }}"
+        query: |
+          CREATE EXTERNAL TABLE IF NOT EXISTS {{ render(vars.table) }}_ext (
+              VendorID string,
+              tpep_pickup_datetime timestamp,
+              tpep_dropoff_datetime timestamp,
+              passenger_count int,
+              trip_distance double,
+              RatecodeID string,
+              store_and_fwd_flag string,
+              PULocationID string,
+              DOLocationID string,
+              payment_type int,
+              fare_amount double,
+              extra double,
+              mta_tax double,
+              tip_amount double,
+              tolls_amount double,
+              improvement_surcharge double,
+              total_amount double,
+              congestion_surcharge double
+          )
+          ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+          WITH SERDEPROPERTIES ('field.delim' = ',')
+          STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat'
+          OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+          LOCATION 's3://{{ kv("AWS_BUCKET_NAME") }}/csv/{{ inputs.taxi }}/'
+          TBLPROPERTIES ('classification' = 'csv');
+
+      - id: athena_yellow_tripdata_add_unique_id_and_filename
+        type: io.kestra.plugin.aws.athena.Query
+        database: "{{ kv('AWS_ATHENA_DATABASE') }}"
+        outputLocation: "s3://{{ kv('AWS_BUCKET_NAME') }}/athena_output/{{ inputs.taxi }}"
+        query: |
+          CREATE TABLE {{ render(vars.table) }}
+          WITH (
+            format = 'PARQUET',
+            external_location = 's3://{{ kv("AWS_BUCKET_NAME") }}/tables/{{ inputs.taxi }}/{{ render(vars.table) }}/'
+          ) AS
+          SELECT
+            md5(to_utf8(concat(
+              coalesce(cast(VendorID as varchar), ''),
+              coalesce(cast(tpep_pickup_datetime as varchar), ''),
+              coalesce(cast(tpep_dropoff_datetime as varchar), ''),
+              coalesce(PULocationID, ''),
+              coalesce(DOLocationID, '')
+            ))) AS unique_row_id,
+            '{{ render(vars.file) }}' AS filename,
+            *
+          FROM {{ render(vars.table) }}_ext;
+
+      - id: athena_yellow_insert_into
+        type: io.kestra.plugin.aws.athena.Query
+        database: "{{ kv('AWS_ATHENA_DATABASE') }}"
+        outputLocation: "s3://{{ kv('AWS_BUCKET_NAME') }}/athena_output/{{ inputs.taxi }}"
+        query: |
+          INSERT INTO {{ kv('AWS_ATHENA_DATABASE') }}.yellow_tripdata
+          SELECT
+            S.unique_row_id,
+            S.filename,
+            S.VendorID,
+            S.tpep_pickup_datetime,
+            S.tpep_dropoff_datetime,
+            S.passenger_count,
+            S.trip_distance,
+            S.RatecodeID,
+            S.store_and_fwd_flag,
+            S.PULocationID,
+            S.DOLocationID,
+            S.payment_type,
+            S.fare_amount,
+            S.extra,
+            S.mta_tax,
+            S.tip_amount,
+            S.tolls_amount,
+            S.improvement_surcharge,
+            S.total_amount,
+            S.congestion_surcharge
+          FROM {{ render(vars.table) }} S
+          LEFT JOIN {{ kv('AWS_ATHENA_DATABASE') }}.yellow_tripdata T
+            ON T.unique_row_id = S.unique_row_id
+          WHERE T.unique_row_id IS NULL;
+     
+
   - id: if_green_taxi
     type: io.kestra.plugin.core.flow.If
     condition: "{{inputs.taxi == 'green'}}"

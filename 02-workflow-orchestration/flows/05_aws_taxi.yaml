@@ -95,7 +95,7 @@ tasks:
         database: "{{kv('AWS_ATHENA_DATABASE')}}"
         outputLocation: "s3://{{kv('AWS_BUCKET_NAME')}}/athena_output/{{inputs.taxi}}"
         query: |
-          CREATE EXTERNAL TABLE IF NOT EXISTS {{kv('AWS_ATHENA_DATABASE')}}.green_tripdata_ext (
+          CREATE EXTERNAL TABLE IF NOT EXISTS {{ render(vars.table) }}_ext (
               VendorID string,
               lpep_pickup_datetime timestamp,
               lpep_dropoff_datetime timestamp,
@@ -122,6 +122,28 @@ tasks:
           STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
           LOCATION 's3://{{kv('AWS_BUCKET_NAME')}}/{{inputs.taxi}}/'
           TBLPROPERTIES ('classification' = 'csv');
+
+      - id: athena_green_tripdata_add_unique_id_and_filename
+        type: io.kestra.plugin.aws.athena.Query
+        database: "{{ kv('AWS_ATHENA_DATABASE') }}"
+        outputLocation: "s3://{{ kv('AWS_BUCKET_NAME') }}/athena_output/{{ inputs.taxi }}"
+        query: |
+          CREATE TABLE {{ render(vars.table) }}
+          WITH (
+            format = 'PARQUET',
+            external_location = 's3://{{ kv("AWS_BUCKET_NAME") }}/{{ render(vars.table) }}/'
+          ) AS
+          SELECT
+            md5(to_utf8(concat(
+              coalesce(cast(VendorID as varchar), ''),
+              coalesce(cast(lpep_pickup_datetime as varchar), ''),
+              coalesce(cast(lpep_dropoff_datetime as varchar), ''),
+              coalesce(cast(PULocationID as varchar), ''),
+              coalesce(cast(DOLocationID as varchar), '')
+            ))) AS unique_row_id,
+            '{{ render(vars.file) }}' AS filename,
+            *
+          FROM {{ render(vars.table) }}_ext;
 
 pluginDefaults:
   - type: io.kestra.plugin.aws

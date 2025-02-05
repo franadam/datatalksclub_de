@@ -4,28 +4,12 @@ description: |
   Best to add a label `backfill:true` from the UI to track executions created via a backfill.
   CSV data used here comes from: https://github.com/DataTalksClub/nyc-tlc-data/releases
 
-concurrency:
-    limit: 1
-
 inputs:
   - id: taxi
     type: SELECT
     displayName: Select taxi type
     values: [yellow, green]
     defaults: yellow
-
-  - id: year
-    type: SELECT
-    displayName: Select year
-    values: ["2019", "2020"]
-    defaults: "2019"
-    allowCustomValue: true # allows you to type 2021 from the UI for the homework 🤗
-
-  - id: month
-    type: SELECT
-    displayName: Select month
-    values: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
-    defaults: "01"
 
 variables:
   file: "{{inputs.taxi}}_tripdata_{{trigger.date | date('yyyy-MM')}}.csv"

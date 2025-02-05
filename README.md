@@ -9,8 +9,9 @@ This is a 'quick and dirty' repository for studying the online course 2025 editi
 
 [**Module 2: Workflow Orchestration**](02-workflow-orchestration)
 
+* [Notes](02-workflow-orchestration/README.md)
 * [Homework](02-workflow-orchestration/homework.md)
-* Office hours
+
 
 [**Workshop 1: Data Ingestion**](workshops/dlt.md)
 

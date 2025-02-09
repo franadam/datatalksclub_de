@@ -8,10 +8,6 @@ from concurrent.futures import ThreadPoolExecutor
 # URL of the TLC trip record data page
 URL = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
 
-# Directory to save downloaded files
-DOWNLOAD_DIR = r".\tlc_trip"
-os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-
 def fetch_parquet_links():
     """Fetches all Parquet file links from the NYC TLC page."""
     response = requests.get(URL)
@@ -34,9 +30,9 @@ def filter_links(parquet_links, taxi, year, month=None):
     
     return filtered_links
 
-def download_file(link):
+def download_file(link, dir):
     """Downloads a single file from a given link."""
-    filename = os.path.join(DOWNLOAD_DIR, os.path.basename(link))
+    filename = os.path.join(dir, os.path.basename(link))
     print(f"Downloading {filename} ...")
     
     with requests.get(link, stream=True) as r:
@@ -49,6 +45,10 @@ def download_file(link):
 
 def main(taxi="green", year=2022, month=None):
     """Main function to fetch and download the required Parquet files."""
+    # Directory to save downloaded files
+    DOWNLOAD_DIR = os.path.join(".", "tlc_trip", taxi)
+    os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+
     parquet_links = fetch_parquet_links()
     filtered_links = filter_links(parquet_links, taxi, year, month)
     
@@ -58,9 +58,9 @@ def main(taxi="green", year=2022, month=None):
     
     print(f"Found {len(filtered_links)} file(s) to download.")
     
-    # Use ThreadPoolExecutor to download files in parallel
+    # Use ThreadPoolExecutor to download files in parallel, passing DOWNLOAD_DIR
     with ThreadPoolExecutor(max_workers=5) as executor:
-        executor.map(download_file, filtered_links)
+        executor.map(lambda link: download_file(link, DOWNLOAD_DIR), filtered_links)
 
     print("All selected files downloaded successfully!")
 

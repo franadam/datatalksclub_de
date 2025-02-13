@@ -37,16 +37,16 @@ An **external table** in AWS Athena is a **logical table definition** that refer
 To create an external table in AWS Athena, use the following SQL:
 
 ```sql
-CREATE EXTERNAL TABLE IF NOT EXISTS kestra_zoomcamp.yellow_tripdata_external (
-    VendorID string,
+CREATE EXTERNAL TABLE IF NOT EXISTS kestra_zoomcamp.yellow_tripdata_2024_external (
+    VendorID int,
     tpep_pickup_datetime timestamp,
     tpep_dropoff_datetime timestamp,
     passenger_count int,
     trip_distance double,
-    RatecodeID string,
+    RatecodeID int,
     store_and_fwd_flag string,
-    PULocationID string,
-    DOLocationID string,
+    PULocationID int,
+    DOLocationID int,
     payment_type int,
     fare_amount double,
     extra double,
@@ -59,7 +59,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS kestra_zoomcamp.yellow_tripdata_external (
 )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
 STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
-LOCATION 's3://kestra-s3-bucket-dtc-de/parquet/yellow'
+LOCATION 's3://kestra-s3-bucket-dtc-de/parquets/yellow'
 TBLPROPERTIES ('classification' = 'parquet');
 ```
 
@@ -70,21 +70,18 @@ Partitioning **splits large datasets into smaller, manageable pieces** based on 
 
 ### **🛠️ Creating a Partitioned Table**
 ```sql
-CREATE TABLE kestra_zoomcamp.yellow_tripdata_partitioned
+CREATE TABLE kestra_zoomcamp.yellow_tripdata_2024_optimized
 WITH (
   format = 'PARQUET',
-  external_location = 's3://kestra-s3-bucket-dtc-de/parquet/yellow',
-  partitioned_by = ARRAY['dropoff_date']
+  external_location = 's3://kestra-s3-bucket-dtc-de/parquets/yellow_2024_optimized',
+  partitioned_by = ARRAY['dropoff_date'],
+  bucketed_by = ARRAY['vendorid'],
+  bucket_count = 10
 )
 AS
-SELECT
-    VendorID,
-    tpep_pickup_datetime,
-    tpep_dropoff_datetime,
-    PULocationID,
-    DOLocationID,
+SELECT *,
   date(tpep_dropoff_datetime) AS dropoff_date
-FROM kestra_zoomcamp.yellow_tripdata_external;
+FROM kestra_zoomcamp.yellow_tripdata_2024_external;
 ```
 <br>
 
@@ -100,22 +97,16 @@ Athena **does not natively support clustering**, but you can achieve a similar e
 Example of bucketing in **Apache Hive (used in Glue/EMR)**:
 
 ```sql
-CREATE TABLE kestra_zoomcamp.yellow_tripdata_clustered
+CREATE TABLE kestra_zoomcamp.yellow_2024_clustered
 WITH (
   format = 'PARQUET',
-  external_location = 's3://kestra-s3-bucket-dtc-de/parquet/yellow',
+  external_location = 's3://kestra-s3-bucket-dtc-de/parquets/yellow_2024_clustered',
   bucketed_by = ARRAY['vendorid'],
   bucket_count = 10
 )
 AS
-SELECT
-    VendorID,
-    tpep_pickup_datetime,
-    tpep_dropoff_datetime,
-    PULocationID,
-    DOLocationID,
-  date(tpep_dropoff_datetime) AS dropoff_date
-FROM kestra_zoomcamp.yellow_tripdata_2022_external;
+SELECT *
+FROM kestra_zoomcamp.yellow_tripdata_2024_external;
 ```
 
 <br>

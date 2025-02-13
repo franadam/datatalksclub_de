@@ -15,12 +15,13 @@ This is a 'quick and dirty' repository for studying the online course 2025 editi
 
 [**Workshop 1: Data Ingestion**](workshops/dlt.md)
 
-* Workshop with dlt
-* [Homework](workshops/dlt.md)
+* [Notes](workshops/dlt/README.md)
+* [Homework](workshops/dlt/dlt_homework.md)
 
 
 [**Module 3: Data Warehouse**](03-data-warehouse)
 
+* [Notes](03-data-warehouse/README.md)
 * [Homework](03-data-warehouse/homework.md)
 
 

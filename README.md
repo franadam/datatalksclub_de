@@ -22,6 +22,7 @@ This is a 'quick and dirty' repository for studying the online course 2025 editi
 [**Module 3: Data Warehouse**](03-data-warehouse)
 
 * [Notes](03-data-warehouse/README.md)
+* [Notes-ingestion-dlt](03-data-warehouse/dlt_pipeline\dlt_file_system.md)
 * [Homework](03-data-warehouse/homework.md)
 
 

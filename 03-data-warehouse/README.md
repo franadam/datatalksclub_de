@@ -1,5 +1,8 @@
-# **📦 Data Warehouse – AWS Athena (DataTalksClub DE Zoomcamp 2025)**
-> **Mastering Data Warehousing with AWS Athena – Partitioning, Clustering, and Optimization** 🚀  
+# **📦 Data Warehouse – AWS Athena**
+
+### *DataTalksClub - Data Engineering Zoomcamp 2025*
+
+## **Mastering Data Warehousing with AWS Athena – Partitioning, Clustering, and Optimization** 🚀  
 
 This repository contains my notes and key takeaways from **Module 3 – Data Warehouse** of the **DataTalksClub Data Engineering Zoomcamp 2025**. In this module, I explored **AWS Athena**, focusing on performance optimization, cost efficiency, and best practices for querying large datasets.
 

@@ -65,6 +65,8 @@ venv.bak/
 
 # 03 Dataware House
 /03-data-warehouse/tlc_trip
+/03-data-warehouse/**/*.toml
+/03-data-warehouse/.env
 
 # Spyder project settings
 .spyderproject

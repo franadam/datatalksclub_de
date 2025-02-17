@@ -9,6 +9,7 @@ source as (
 renamed as (
 
     select
+        {{dbt_utils.generate_surrogate_key(["vendorid", "lpep_pickup_datetime"])}} as trip_id,
         unique_row_id,
         filename,
         vendorid,

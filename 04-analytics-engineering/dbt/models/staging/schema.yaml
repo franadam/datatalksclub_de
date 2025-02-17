@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: staging
+    database: AwsDataCatalog # Data source in athena
+    schema: kestra_zoomcamp # Database in Athena
+
+    tables:
+      - name: green_tripdata
+      - name: yellow_tripdata

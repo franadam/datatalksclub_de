@@ -8,6 +8,7 @@ sources:
     tables:
       - name: green_tripdata_iceberg
       - name: yellow_tripdata_iceberg
+      - name: fhv_tripdata_iceberg
 
 models:
   - name: stg_staging__green_tripdata

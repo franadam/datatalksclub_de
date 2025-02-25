@@ -6,5 +6,5 @@ sources:
     schema: kestra_zoomcamp # Database in Athena
 
     tables:
-      - name: green_tripdata
-      - name: yellow_tripdata
+      - name: green_tripdata_iceberg
+      - name: yellow_tripdata_iceberg

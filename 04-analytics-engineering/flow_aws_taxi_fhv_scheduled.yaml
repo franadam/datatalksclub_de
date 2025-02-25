@@ -272,7 +272,8 @@ tasks:
             ))) AS unique_row_id,
             '{{ render(vars.file) }}' AS filename,
             *
-          FROM {{ render(vars.table) }}_ext;  
+          FROM {{ render(vars.table) }}_ext;
+          
 
       - id: athena_green_insert_into
         type: io.kestra.plugin.aws.athena.Query
@@ -417,7 +418,7 @@ pluginDefaults:
 triggers:
   - id: green_schedule
     type: io.kestra.plugin.core.trigger.Schedule
-    cron: "0 9 1 * *"
+    cron: "0 8 1 * *"
     inputs:
       taxi: green
 
@@ -426,3 +427,9 @@ triggers:
     cron: "0 10 1 * *"
     inputs:
       taxi: yellow
+
+  - id: fhv_schedule
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 9 1 * *"
+    inputs:
+      taxi: fhv

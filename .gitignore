@@ -68,6 +68,10 @@ venv.bak/
 /03-data-warehouse/**/*.toml
 /03-data-warehouse/.env
 
+# 04 Analytics engineering
+/04-analytics-engineering/ny_taxi_postgres_data
+/04-analytics-engineering/pgadmin
+
 # Spyder project settings
 .spyderproject
 .spyproject

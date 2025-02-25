@@ -1,0 +1,197 @@
+version: 2
+
+sources:
+  - name: staging
+    database: AwsDataCatalog # Data source in athena
+    schema: kestra_zoomcamp # Database in Athena
+
+    tables:
+      - name: green_tripdata_iceberg
+      - name: yellow_tripdata_iceberg
+
+models:
+  - name: stg_staging__green_tripdata
+    description: ""
+    columns:
+      - name: tripid
+        data_type: string
+        description: ""
+        tests:
+          - unique:
+              severity: warn
+          - not_null:
+              severity: warn
+          
+      - name: vendorid
+        data_type: int
+        description: ""
+
+      - name: ratecodeid
+        data_type: int
+        description: ""
+
+      - name: pickup_locationid
+        data_type: int
+        description: ""
+        tests:
+          - relationships:
+              to: ref('taxi_zone_lookup')
+              field: locationid
+              severity: warn
+
+      - name: dropoff_locationid
+        data_type: int
+        description: ""
+        tests:
+          - relationships:
+              to: ref('taxi_zone_lookup')
+              field: locationid
+              severity: warn
+
+      - name: pickup_datetime
+        data_type: timestamp
+        description: ""
+
+      - name: dropoff_datetime
+        data_type: timestamp
+        description: ""
+
+      - name: store_and_fwd_flag
+        data_type: string
+        description: ""
+
+      - name: passenger_count
+        data_type: int
+        description: ""
+
+      - name: trip_distance
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: trip_type
+        data_type: int
+        description: ""
+
+      - name: fare_amount
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: extra
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: mta_tax
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: tip_amount
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: tolls_amount
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: improvement_surcharge
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: total_amount
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: payment_type
+        data_type: int
+        description: ""
+        tests:
+          - accepted_values:
+              values: "{{var('payment_type_values')}}"
+              severity: warn
+              quote: false
+
+      - name: payment_type_description
+        data_type: varchar(11)
+        description: ""
+
+  - name: stg_staging__yellow_tripdata
+    description: ""
+    columns:
+      - name: tripid
+        data_type: string
+        description: ""
+
+      - name: vendorid
+        data_type: int
+        description: ""
+
+      - name: ratecodeid
+        data_type: int
+        description: ""
+
+      - name: pickup_locationid
+        data_type: int
+        description: ""
+
+      - name: dropoff_locationid
+        data_type: int
+        description: ""
+
+      - name: pickup_datetime
+        data_type: timestamp
+        description: ""
+
+      - name: dropoff_datetime
+        data_type: timestamp
+        description: ""
+
+      - name: store_and_fwd_flag
+        data_type: string
+        description: ""
+
+      - name: passenger_count
+        data_type: int
+        description: ""
+
+      - name: trip_distance
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: trip_type
+        data_type: int
+        description: ""
+
+      - name: fare_amount
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: extra
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: mta_tax
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: tip_amount
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: tolls_amount
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: improvement_surcharge
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: total_amount
+        data_type: decimal(38,0)
+        description: ""
+
+      - name: payment_type
+        data_type: int
+        description: ""
+
+      - name: payment_type_description
+        data_type: varchar(11)
+        description: ""

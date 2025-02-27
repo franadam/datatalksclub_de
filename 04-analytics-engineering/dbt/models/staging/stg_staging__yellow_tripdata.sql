@@ -22,18 +22,19 @@ select
     -- trip info
     store_and_fwd_flag,
     {{ dbt.safe_cast("passenger_count", api.Column.translate_type("integer")) }} as passenger_count,
-    cast(trip_distance as Decimal) as trip_distance,
+    cast(trip_distance as Double) as trip_distance,
     -- yellow cabs are always street-hail
     1 as trip_type,
     
     -- payment info
-    cast(fare_amount as Decimal) as fare_amount,
-    cast(extra as Decimal) as extra,
-    cast(mta_tax as Decimal) as mta_tax,
-    cast(tip_amount as Decimal) as tip_amount,
-    cast(tolls_amount as Decimal) as tolls_amount,
-    cast(improvement_surcharge as Decimal) as improvement_surcharge,
-    cast(total_amount as Decimal) as total_amount,
+    cast(fare_amount as Double) as fare_amount,
+    cast(extra as Double) as extra,
+    cast(mta_tax as Double) as mta_tax,
+    cast(tip_amount as Double) as tip_amount,
+    cast(tolls_amount as Double) as tolls_amount,
+    cast(0 as Double) as ehail_fee,
+    cast(improvement_surcharge as Double) as improvement_surcharge,
+    cast(total_amount as Double) as total_amount,
     coalesce({{ dbt.safe_cast("payment_type", api.Column.translate_type("integer")) }},0) as payment_type,
     {{ get_payment_type_description('payment_type') }} as payment_type_description
 from tripdata

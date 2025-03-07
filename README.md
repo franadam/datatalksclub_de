@@ -28,6 +28,7 @@ This is a 'quick and dirty' repository for studying the online course 2025 editi
 
 [**Module 4: Analytics Engineering**](04-analytics-engineering/)
 
+* [Notes](/04-analytics-engineering/README.md)
 * [Homework](04-analytics-engineering/homework.md)
 
 

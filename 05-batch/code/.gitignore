@@ -4,6 +4,7 @@
 tmp/
 
 #data
+data/
 fhvhv
 zones
 fhvhv_tripdata_2021-01.csv.gz

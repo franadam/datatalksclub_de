@@ -72,6 +72,16 @@ venv.bak/
 /04-analytics-engineering/ny_taxi_postgres_data
 /04-analytics-engineering/pgadmin
 
+# 05-batch
+/05-batch/code/.ipynb_checkpoints
+/05-batch/code/tmp/
+/05-batch/code/data/
+/05-batch/code/fhvhv/
+/05-batch/code/zones
+/05-batch/code/fhvhv_tripdata_2021-01.csv.gz
+/05-batch/code/taxi_zone_lookup.csv
+
+
 # Spyder project settings
 .spyderproject
 .spyproject

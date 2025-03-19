@@ -83,6 +83,10 @@ venv.bak/
 /05-batch/code/yellow_tripdata_2024-10_partitioned.parquet
 /05-batch/code/yellow_tripdata_2024-10.parquet
 
+# 06 streaming
+/06-streaming/data
+/06-streaming/pyflink/pgadmin
+/06-streaming/green_tripdata_2019-10.csv.gz
 
 # Spyder project settings
 .spyderproject

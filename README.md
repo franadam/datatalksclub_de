@@ -34,11 +34,13 @@ This is a 'quick and dirty' repository for studying the online course 2025 editi
 
 [**Module 5: Batch processing**](05-batch/)
 
+* [Notes](/05-batch/README.md)
 * [Homework](05-batch/homework.md)
 
 
 [**Module 6: Stream Processing**](06-streaming)
 
+* [Notes](/06-streaming/README.md)
 * [Homework](06-streaming/homework.md)
 
 
